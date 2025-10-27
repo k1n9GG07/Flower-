@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flower — Цветочный магазин</title>
+  <style>
+    /* === Общие стили === */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #fff;
+      color: #eee;
+      line-height: 1.6;
+      overflow-x: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* === Шапка сайта — розовая === */
+    header {
+      background-color: #d87093;
+      /* Розовый как на референсе */
+      padding: 1rem 2rem;
+      text-align: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 1rem;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    /* === Левый Sidebar — выдвижной === */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -200px;
+      /* Скрыто по умолчанию */
+      width: 200px;
+      /* Уменьшено с 250px */
+      height: 100vh;
+      background-color: #d87093;
+      transition: left 0.3s ease;
+      z-index: 100;
+      padding-top: 1rem;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+      overflow-y: auto;
+    }
+
+    .sidebar.active {
+      left: 0;
+    }
+
+    .sidebar-header {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .close-btn {
+      color: white;
+      font-size: 1.25rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0.25rem 0.5rem;
+      border-radius: 50%;
+      transition: background 0.2s;
+    }
+
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-menu {
+      padding: 0.75rem 1rem;
+    }
+
+    .sidebar-menu ul {
+      list-style: none;
+    }
+
+    .sidebar-menu li {
+      margin-bottom: 0.75rem;
+    }
+
+    .sidebar-menu a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 0.5rem 0.75rem;
+      border-radius: 4px;
+      transition: background 0.2s;
+      font-size: 0.95rem;
+    }
+
+    .sidebar-menu a:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* === Кнопка открытия меню — скромная === */
+    .menu-toggle {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      background: rgba(216, 112, 147, 0.8);
+      /* Полупрозрачный розовый */
+      color: white;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 1.25rem;
+      cursor: pointer;
+      z-index: 101;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-toggle:hover {
+      background: rgba(216, 112, 147, 1);
+    }
+
+    /* === Основной контент — тёмный фон с изображением === */
+    .main-container {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 0;
+      width: 100%;
+      margin: 0;
+      background-color: #221c2b;
+      position: relative;
+      overflow: hidden;
+      min-height: calc(100vh - 80px);
+      /* Высота без шапки */
+      padding: 0;
+    }
+
+    /* Фоновое изображение цветов — на весь блок */
+    .greeting-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('https://wp-s.ru/wallpapers/12/4/399133354435756/otrazhenie-cvetov-v-kaplyax-posle-dozhdya.jpg') no-repeat center;
+      background-size: cover;
+      z-index: -1;
+    }
+
+    /* Приветственная секция — текст поверх изображения */
+    .greeting {
+      background-image: url(https://wp-s.ru/wallpapers/12/4/399133354435756/otrazhenie-cvetov-v-kaplyax-posle-dozhdya.jpg);
+      padding: 2rem 2rem 1rem 2rem;
+      text-align: center;
+      color: #f0e6ff;
+      z-index: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+
+    .greeting h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+      color: #f0e6ff;
+      font-weight: normal;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .greeting p {
+      font-size: 1.1rem;
+      color: #d0c6e0;
+      max-width: 600px;
+      margin: 0 auto;
+      letter-spacing: 0.5px;
+      line-height: 1.4;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    }
+
+    /* === Секция "Наши категории" — правая панель === */
+    .categories {
+      padding: 1.5rem;
+      background: linear-gradient(90deg, rgba(34, 28, 43, 0.8) 0%, rgba(29, 25, 40, 0.9) 100%);
+      color: #fff;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+      min-height: 100%;
+      overflow-y: auto;
+    }
+
+    .categories h2 {
+      text-align: left;
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      color: #d87093;
+      width: 100%;
+    }
+
+    .category-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    .category-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      width: 100%;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .category-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateX(4px);
+    }
+
+    .category-image {
+      width: 60px;
+      height: 60px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .category-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+
+    .category-text {
+      flex: 1;
+    }
+
+    .category-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #d87093;
+      margin-bottom: 0.25rem;
+    }
+
+    .category-price {
+      font-weight: bold;
+      font-size: 1rem;
+      color: #ffffff;
+    }
+
+    /* === Нижняя секция — светло-зелёная === */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      padding: 1rem 2rem;
+      background-color: #ffffff;
+      margin: 0;
+      border-top: 1px solid #ffffff;
+      width: 100%;
+      z-index: 10;
+    }
+
+    .feature-item {
+      text-align: center;
+      padding: 1rem;
+      background: transparent;
+      color: #d87093;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    /* === Адаптивность === */
+    @media (max-width: 768px) {
+      .main-container {
+        grid-template-columns: 1fr;
+        padding: 0;
+      }
+
+      .greeting {
+        padding: 1.5rem 1rem 1rem 1rem;
+      }
+
+      .greeting h1 {
+        font-size: 1.5rem;
+      }
+
+      .greeting p {
+        font-size: 1rem;
+      }
+
+      .categories {
+        padding: 1rem;
+      }
+
+      .categories h2 {
+        font-size: 1.5rem;
+      }
+
+      .category-item {
+        padding: 0.5rem;
+        gap: 0.5rem;
+      }
+
+      .category-image {
+        width: 50px;
+        height: 50px;
+      }
+
+      .features {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+      }
+
+      .menu-toggle {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 480px) {
+      header {
+        padding: 0.75rem 1rem;
+      }
+
+      nav ul {
+        gap: 0.75rem;
+      }
+
+      nav a {
+        font-size: 0.9rem;
+      }
+
+      .greeting h1 {
+        font-size: 1.3rem;
+      }
+
+      .greeting p {
+        font-size: 0.95rem;
+      }
+
+      .feature-item {
+        font-size: 1rem;
+      }
+    }
+
+    /* === Для десктопа — sidebar скрыт по умолчанию === */
+    @media (min-width: 769px) {
+      .sidebar {
+        left: -200px;
+      }
+
+      .menu-toggle {
+        display: flex;
+      }
+
+      .main-container {
+        padding-left: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Кнопка открытия меню — скромная -->
+  <button class="menu-toggle" id="menuToggle">☰</button>
+
+  <!-- Левый Sidebar — без слова "Меню", компактный -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div></div>
+      <button class="close-btn" id="closeBtn">×</button>
+    </div>
+    <div class="sidebar-menu">
+      <ul>
+        <li><a href="#about">О нас</a></li>
+        <li><a href="#contacts">Наши контакты</a></li>
+        <li><a href="#catalog">Каталог</a></li>
+        <li><a href="#delivery">Доставка</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- Шапка -->
+  <header>
+    <nav>
+      <ul>
+        <li><a href="#about">О нас</a></li>
+        <li><a href="#contacts">Наши контакты</a></li>
+        <li><a href="#catalog">Каталог</a></li>
+        <li><a href="#delivery">Доставка</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Основной контент -->
+  <main class="main-container">
+    <!-- Фоновое изображение цветов -->
+    <div class="greeting-background"></div>
+
+    <!-- Приветственная секция -->
+    <section class="greeting">
+      <h1>Дорогие клиенты!</h1>
+      <p>Компания Flower от всего сердца поздравляет вас с наступающим Новым годом!</p>
+    </section>
+
+    <!-- Сайдбар с категориями -->
+    <aside class="categories">
+      <h2>Наши категории</h2>
+      <div class="category-list">
+        <!-- Категория 1: Розы -->
+        <a href="#roses" class="category-item">
+          <div class="category-image">
+            <img src="https://img.freepik.com/free-photo/closeup-shot-red-rose-with-dew-top-black_181624-28079.jpg?semt=ais_hybrid&w=740&q=80" alt="Розы" />
+          </div>
+          <div class="category-text">
+            <div class="category-name">Розы</div>
+            <div class="category-price">от 100р.</div>
+          </div>
+        </a>
+
+        <!-- Категория 2: Букеты -->
+        <a href="#bouquets" class="category-item">
+          <div class="category-image">
+            <img src="https://krasnodarflora.ru/upload/resize_cache/iblock/6e3/685_685_2/pfduoaj1kvr9cnui33cxiz4x41dsnb0g.JPG" alt="Букеты" />
+          </div>
+          <div class="category-text">
+            <div class="category-name">Букеты</div>
+            <div class="category-price">от 500р.</div>
+          </div>
+        </a>
+
+        <!-- Категория 3: Букеты в коробке -->
+        <a href="#boxed" class="category-item">
+          <div class="category-image">
+            <img src="https://klumba.moscow/wp-content/uploads/2019/02/P2290550-rotated.jpeg" alt="Букеты в коробке" />
+          </div>
+          <div class="category-text">
+            <div class="category-name">Букеты в коробке</div>
+            <div class="category-price">1500р.</div>
+          </div>
+        </a>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Нижняя секция -->
+  <section class="features">
+    <div class="feature-item">Розы</div>
+    <div class="feature-item">Ромашки</div>
+    <div class="feature-item">Ландыши</div>
+  </section>
+
+  <script>
+    // JavaScript для выдвижного меню
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const closeBtn = document.getElementById('closeBtn');
+
+    // Открыть меню
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.add('active');
+      menuToggle.blur();
+    });
+
+    // Закрыть по крестику
+    closeBtn.addEventListener('click', () => {
+      sidebar.classList.remove('active');
+    });
+
+    // Закрыть по клику вне меню
+    document.addEventListener('click', (e) => {
+      if (!sidebar.contains(e.target) && e.target !== menuToggle && !e.target.closest('.menu-toggle')) {
+        sidebar.classList.remove('active');
+      }
+    });
+
+    // Закрыть по клавише Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+        sidebar.classList.remove('active');
+      }
+    });
+  </script>
+</body>
+
+</html>
